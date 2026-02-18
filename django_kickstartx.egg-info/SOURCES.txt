@@ -4,6 +4,7 @@ pyproject.toml
 django_kickstart/__init__.py
 django_kickstart/cli.py
 django_kickstart/generator.py
+django_kickstart/venv_utils.py
 django_kickstart/templates/manage.py.j2
 django_kickstart/templates/requirements.txt.j2
 django_kickstart/templates/app/admin.py.j2

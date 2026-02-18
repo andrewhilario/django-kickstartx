@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.0.2] — 2026-02-18
+
+### 🚀 Features
+
+- **Auto virtual environment**: `django-kickstart create` now automatically creates a venv and installs dependencies
+- **Cross-platform support**: Improved Windows/Unix compatibility for venv creation
+
 ## [1.0.0] — 2026-02-18
 
 ### 🚀 Features

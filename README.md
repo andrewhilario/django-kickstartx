@@ -15,6 +15,7 @@ Skip the boilerplate. Start building.
 - **Two project types**: MVP (traditional Django with templates) or API (Django REST Framework)
 - **View style choice**: Function-Based Views (FBV) or Class-Based Views (CBV)
 - **Database options**: SQLite (dev) or PostgreSQL (production)
+- **Auto virtual environment**: Creates a venv and installs dependencies automatically
 - **Production-ready settings**: Security hardened, environment variables via `python-decouple`
 - **Admin panel**: Enabled and configured out of the box
 - **URL routing**: Fully wired with app URLs included
@@ -52,14 +53,23 @@ django-kickstart create myproject --type api --views cbv --db postgresql
 
 ### After creating your project
 
+A virtual environment is created automatically with all dependencies installed.
+
 ```bash
 cd myproject
-pip install -r requirements.txt
+# Activate the virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
 cp .env.example .env
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 ```
+
+> **Tip:** Use `--no-venv` to skip automatic virtual environment creation.
 
 ---
 
@@ -70,6 +80,7 @@ python manage.py runserver
 | `--type` | `mvp`, `api` | interactive | MVP (templates) or API (DRF) |
 | `--views` | `fbv`, `cbv` | interactive | Function or class-based views |
 | `--db` | `sqlite`, `postgresql` | interactive | Database backend |
+| `--no-venv` | — | `false` | Skip automatic virtual environment creation |
 
 ---
 
@@ -79,6 +90,7 @@ python manage.py runserver
 
 ```
 myproject/
+├── venv/                       # Auto-created virtual environment
 ├── manage.py
 ├── requirements.txt
 ├── .env.example
@@ -106,6 +118,7 @@ myproject/
 
 ```
 myproject/
+├── venv/                       # Auto-created virtual environment
 ├── manage.py
 ├── requirements.txt
 ├── .env.example

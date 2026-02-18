@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-kickstartx"
-version = "1.0.1"
+version = "1.0.3"
 description = "Scaffold production-ready Django projects in seconds — MVP or REST API, CBV or FBV."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "Drew Hilario", email = "hilarioandrew12@gmail.com"},
 ]
 keywords = ["django", "scaffold", "boilerplate", "starter", "project-template", "kickstart"]
 classifiers = [
@@ -36,9 +36,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ainzzuu/django-kickstartx"
-Repository = "https://github.com/ainzzuu/django-kickstartx"
-Issues = "https://github.com/ainzzuu/django-kickstartx/issues"
+Homepage = "https://www.djangokickstartx.me/"
+Repository = "https://github.com/andrewhilario/django-kickstartx"
+Issues = "https://github.com/andrewhilario/django-kickstartx/issues"
 
 [project.scripts]
 django-kickstart = "django_kickstart.cli:main"

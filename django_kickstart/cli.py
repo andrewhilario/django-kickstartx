@@ -5,6 +5,7 @@ from colorama import init, Fore, Style
 
 from django_kickstart import __version__
 from django_kickstart.generator import ProjectGenerator
+from django_kickstart.venv_utils import create_virtualenv, _get_activate_hint
 
 init(autoreset=True)
 
@@ -87,7 +88,14 @@ def main():
     default=None,
     help="Database: sqlite or postgresql.",
 )
-def create(project_name: str, project_type: str, view_style: str, database: str):
+@click.option(
+    "--no-venv",
+    "no_venv",
+    is_flag=True,
+    default=False,
+    help="Skip virtual environment creation.",
+)
+def create(project_name: str, project_type: str, view_style: str, database: str, no_venv: bool):
     """Create a new Django project scaffold.
 
     PROJECT_NAME is the name of the project to create.
@@ -135,13 +143,26 @@ def create(project_name: str, project_type: str, view_style: str, database: str)
         click.echo(f"{Fore.RED}✖ {e}{Style.RESET_ALL}")
         raise SystemExit(1)
 
+    # Create virtual environment (unless opted out)
+    venv_created = False
+    if not no_venv:
+        project_dir = generator.output_dir
+        venv_created = create_virtualenv(project_dir)
+
     # Success message
     click.echo(f"\n{Fore.GREEN}{'━' * 50}")
     click.echo(f"  ✅ Project '{project_name}' created successfully!")
     click.echo(f"{'━' * 50}{Style.RESET_ALL}")
     click.echo(f"\n{Fore.YELLOW}Next steps:{Style.RESET_ALL}")
     click.echo(f"  cd {project_name}")
-    click.echo("  pip install -r requirements.txt")
+
+    if venv_created:
+        click.echo(f"  {_get_activate_hint()}")
+    else:
+        click.echo("  python -m venv venv")
+        click.echo(f"  {_get_activate_hint()}")
+        click.echo("  pip install -r requirements.txt")
+
     click.echo("  cp .env.example .env")
     click.echo("  python manage.py migrate")
     click.echo("  python manage.py createsuperuser")
