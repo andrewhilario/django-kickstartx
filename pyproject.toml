@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-kickstartx"
+version = "1.0.1"
+description = "Scaffold production-ready Django projects in seconds — MVP or REST API, CBV or FBV."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+keywords = ["django", "scaffold", "boilerplate", "starter", "project-template", "kickstart"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "click>=8.0",
+    "jinja2>=3.0",
+    "colorama>=0.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/ainzzuu/django-kickstartx"
+Repository = "https://github.com/ainzzuu/django-kickstartx"
+Issues = "https://github.com/ainzzuu/django-kickstartx/issues"
+
+[project.scripts]
+django-kickstart = "django_kickstart.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["django_kickstart*"]
+
+[tool.setuptools.package-data]
+django_kickstart = ["templates/**/*.j2"]

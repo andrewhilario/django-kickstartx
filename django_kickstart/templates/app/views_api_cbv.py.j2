@@ -1,0 +1,24 @@
+from rest_framework import viewsets, permissions
+
+from .models import Item
+from .serializers import ItemSerializer
+
+
+class ItemViewSet(viewsets.ModelViewSet):
+    """
+    A ViewSet for viewing and editing Item instances.
+
+    Provides `list`, `create`, `retrieve`, `update`, `partial_update`, and `destroy` actions.
+    """
+
+    queryset = Item.objects.filter(is_active=True)
+    serializer_class = ItemSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        """Hook for custom logic on create."""
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """Hook for custom logic on update."""
+        serializer.save()

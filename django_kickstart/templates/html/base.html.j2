@@ -1,0 +1,36 @@
+{# raw/endraw blocks prevent Django template syntax from being processed by Jinja2 #}
+{% raw %}{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} | {% endraw %}{{ project_name }}{% raw %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="{% url 'home' %}" class="navbar-brand">{% endraw %}{{ project_name }}{% raw %}</a>
+            <ul class="navbar-nav">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'admin:index' %}">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 {% endraw %}{{ project_name }}{% raw %}. All rights reserved.</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>{% endraw %}

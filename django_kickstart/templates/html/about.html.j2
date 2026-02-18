@@ -1,0 +1,16 @@
+{% raw %}{% extends "{% endraw %}{{ app_name }}{% raw %}/base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<section class="about-section">
+    <h1>About {% endraw %}{{ project_name }}{% raw %}</h1>
+    <p>
+        This project was scaffolded with <strong>Django Kickstart</strong> —
+        a tool for generating production-ready Django projects in seconds.
+    </p>
+    <p>
+        Edit this page at <code>{% endraw %}{{ app_name }}{% raw %}/templates/{% endraw %}{{ app_name }}{% raw %}/about.html</code>.
+    </p>
+</section>
+{% endblock %}{% endraw %}

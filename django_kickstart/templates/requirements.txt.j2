@@ -1,0 +1,22 @@
+# ─── Core ───────────────────────────────────────────────────────────────────────
+Django>=4.2,<6.0
+python-decouple>=3.8
+{% if is_api %}
+
+# ─── Django REST Framework ──────────────────────────────────────────────────────
+djangorestframework>=3.14
+django-cors-headers>=4.0
+django-filter>=23.0
+{% endif %}
+{% if is_postgresql %}
+
+# ─── PostgreSQL ─────────────────────────────────────────────────────────────────
+psycopg2-binary>=2.9
+{% endif %}
+
+# ─── Development ────────────────────────────────────────────────────────────────
+# Uncomment as needed:
+# django-debug-toolbar>=4.0
+# flake8>=6.0
+# black>=23.0
+# isort>=5.12

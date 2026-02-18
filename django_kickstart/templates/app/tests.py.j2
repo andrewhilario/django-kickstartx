@@ -1,0 +1,52 @@
+from django.test import TestCase
+from django.urls import reverse
+
+from .models import Item
+
+
+class ItemModelTest(TestCase):
+    """Basic tests for the Item model."""
+
+    def setUp(self):
+        self.item = Item.objects.create(
+            title="Test Item",
+            description="A test item description.",
+        )
+
+    def test_item_creation(self):
+        """Test that an item can be created."""
+        self.assertEqual(self.item.title, "Test Item")
+        self.assertTrue(self.item.is_active)
+
+    def test_item_str(self):
+        """Test the string representation."""
+        self.assertEqual(str(self.item), "Test Item")
+
+{% if is_mvp %}
+
+class ViewTests(TestCase):
+    """Basic view tests."""
+
+    def test_home_page(self):
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_about_page(self):
+        response = self.client.get(reverse("about"))
+        self.assertEqual(response.status_code, 200)
+{% endif %}
+{% if is_api %}
+
+class APITests(TestCase):
+    """Basic API tests."""
+
+    def setUp(self):
+        self.item = Item.objects.create(
+            title="API Test Item",
+            description="Testing the API.",
+        )
+
+    def test_item_list(self):
+        response = self.client.get("/api/items/")
+        self.assertEqual(response.status_code, 200)
+{% endif %}

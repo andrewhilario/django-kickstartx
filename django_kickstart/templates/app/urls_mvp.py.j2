@@ -1,0 +1,19 @@
+from django.urls import path
+
+{% if is_cbv %}
+from .views import HomeView, AboutView
+{% else %}
+from . import views
+{% endif %}
+
+{% if is_cbv %}
+urlpatterns = [
+    path("", HomeView.as_view(), name="home"),
+    path("about/", AboutView.as_view(), name="about"),
+]
+{% else %}
+urlpatterns = [
+    path("", views.home, name="home"),
+    path("about/", views.about, name="about"),
+]
+{% endif %}

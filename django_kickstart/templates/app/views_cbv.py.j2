@@ -1,0 +1,18 @@
+from django.views.generic import ListView, TemplateView
+
+from .models import Item
+
+
+class HomeView(ListView):
+    """Home page — displays a list of active items."""
+
+    model = Item
+    template_name = "{{ app_name }}/home.html"
+    context_object_name = "items"
+    queryset = Item.objects.filter(is_active=True)
+
+
+class AboutView(TemplateView):
+    """About page."""
+
+    template_name = "{{ app_name }}/about.html"

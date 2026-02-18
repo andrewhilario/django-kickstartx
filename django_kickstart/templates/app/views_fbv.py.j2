@@ -1,0 +1,14 @@
+from django.shortcuts import render, get_object_or_404
+
+from .models import Item
+
+
+def home(request):
+    """Home page — displays a list of active items."""
+    items = Item.objects.filter(is_active=True)
+    return render(request, "{{ app_name }}/home.html", {"items": items})
+
+
+def about(request):
+    """About page."""
+    return render(request, "{{ app_name }}/about.html")

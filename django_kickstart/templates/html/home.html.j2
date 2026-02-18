@@ -1,0 +1,28 @@
+{% raw %}{% extends "{% endraw %}{{ app_name }}{% raw %}/base.html" %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to {% endraw %}{{ project_name }}{% raw %}</h1>
+    <p>Your Django project is up and running! Start building something amazing.</p>
+</section>
+
+<section class="items-section">
+    <h2>Items</h2>
+    {% if items %}
+        <div class="items-grid">
+            {% for item in items %}
+                <div class="item-card">
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.description|truncatewords:20 }}</p>
+                    <small>Created: {{ item.created_at|date:"M d, Y" }}</small>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state">No items yet. <a href="{% url 'admin:index' %}">Add some via the admin panel</a>.</p>
+    {% endif %}
+</section>
+{% endblock %}{% endraw %}
