@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    {% if is_postgresql %}
+    environment:
+      - DATABASE=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+    {% endif %}
+
+  {% if is_postgresql %}
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER={{ project_name }}_user
+      - POSTGRES_PASSWORD={{ project_name }}_password
+      - POSTGRES_DB={{ project_name }}_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ project_name }}_user -d {{ project_name }}_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  {% endif %}
+
+{% if is_postgresql %}
+volumes:
+  postgres_data:
+{% endif %}

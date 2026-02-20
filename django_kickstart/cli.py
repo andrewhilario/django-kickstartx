@@ -51,7 +51,8 @@ def prompt_choice(label: str, choices: dict, default: str) -> str:
             idx = int(raw) - 1
             if 0 <= idx < len(keys):
                 selected = keys[idx]
-                click.echo(f"  {Fore.GREEN}✔ {choices[selected]}{Style.RESET_ALL}")
+                click.echo(
+                    f"  {Fore.GREEN}✔ {choices[selected]}{Style.RESET_ALL}")
                 return selected
         except ValueError:
             pass
@@ -95,7 +96,14 @@ def main():
     default=False,
     help="Skip virtual environment creation.",
 )
-def create(project_name: str, project_type: str, view_style: str, database: str, no_venv: bool):
+@click.option(
+    "--docker",
+    "with_docker",
+    is_flag=True,
+    default=False,
+    help="Add Docker configuration.",
+)
+def create(project_name: str, project_type: str, view_style: str, database: str, no_venv: bool, with_docker: bool):
     """Create a new Django project scaffold.
 
     PROJECT_NAME is the name of the project to create.
@@ -112,7 +120,8 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
 
     # Interactive prompts for missing options
     if project_type is None:
-        project_type = prompt_choice("Select project type:", PROJECT_TYPES, "mvp")
+        project_type = prompt_choice(
+            "Select project type:", PROJECT_TYPES, "mvp")
 
     if view_style is None:
         view_style = prompt_choice("Select view style:", VIEW_STYLES, "fbv")
@@ -120,10 +129,13 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
     if database is None:
         database = prompt_choice("Select database:", DATABASES, "sqlite")
 
-    click.echo(f"\n{Fore.CYAN}📦 Creating project '{project_name}'...{Style.RESET_ALL}")
+    click.echo(
+        f"\n{Fore.CYAN}📦 Creating project '{project_name}'...{Style.RESET_ALL}")
     click.echo(f"   Type:     {PROJECT_TYPES[project_type]}")
     click.echo(f"   Views:    {VIEW_STYLES[view_style]}")
     click.echo(f"   Database: {DATABASES[database]}")
+    if with_docker:
+        click.echo(f"   Docker:   {Fore.GREEN}Yes{Style.RESET_ALL}")
     click.echo()
 
     # Generate project
@@ -132,6 +144,7 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
         project_type=project_type,
         view_style=view_style,
         database=database,
+        with_docker=with_docker,
     )
 
     try:
@@ -156,17 +169,23 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
     click.echo(f"\n{Fore.YELLOW}Next steps:{Style.RESET_ALL}")
     click.echo(f"  cd {project_name}")
 
-    if venv_created:
-        click.echo(f"  {_get_activate_hint()}")
+    if with_docker:
+        click.echo("  cp .env.example .env")
+        click.echo(f"  {Fore.CYAN}docker-compose up --build{Style.RESET_ALL}")
+        click.echo(f"\n{Fore.YELLOW}Once running:{Style.RESET_ALL}")
+        click.echo("  docker-compose exec web python manage.py createsuperuser")
     else:
-        click.echo("  python -m venv venv")
-        click.echo(f"  {_get_activate_hint()}")
-        click.echo("  pip install -r requirements.txt")
+        if venv_created:
+            click.echo(f"  {_get_activate_hint()}")
+        else:
+            click.echo("  python -m venv venv")
+            click.echo(f"  {_get_activate_hint()}")
+            click.echo("  pip install -r requirements.txt")
 
-    click.echo("  cp .env.example .env")
-    click.echo("  python manage.py migrate")
-    click.echo("  python manage.py createsuperuser")
-    click.echo("  python manage.py runserver")
+        click.echo("  cp .env.example .env")
+        click.echo("  python manage.py migrate")
+        click.echo("  python manage.py createsuperuser")
+        click.echo("  python manage.py runserver")
 
     if project_type == "api":
         click.echo(f"\n{Fore.CYAN}API endpoints:{Style.RESET_ALL}")

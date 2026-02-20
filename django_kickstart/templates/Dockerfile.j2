@@ -1,0 +1,37 @@
+# Pull official base image
+FROM python:3.12-slim-bookworm
+
+# Set work directory
+WORKDIR /usr/src/app
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+{% if is_postgresql %}
+# Install system dependencies (PostgreSQL + wait-for-db tooling)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  netcat-openbsd \
+  libpq-dev \
+  gcc \
+  && rm -rf /var/lib/apt/lists/*
+{% endif %}
+
+# Install python dependencies
+COPY ./requirements.txt .
+RUN pip install --upgrade pip --no-cache-dir \
+  && pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . .
+
+{% if is_postgresql %}
+# Make entrypoint executable (fix Windows line endings too)
+RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh \
+  && chmod +x /usr/src/app/entrypoint.sh
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+{% endif %}
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+

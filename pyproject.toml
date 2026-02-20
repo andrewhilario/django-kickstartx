@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-kickstartx"
-version = "1.0.3"
+version = "1.0.5"
 description = "Scaffold production-ready Django projects in seconds — MVP or REST API, CBV or FBV."
 readme = "README.md"
 license = {text = "MIT"}

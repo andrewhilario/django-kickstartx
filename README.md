@@ -15,6 +15,7 @@ Skip the boilerplate. Start building.
 - **Two project types**: MVP (traditional Django with templates) or API (Django REST Framework)
 - **View style choice**: Function-Based Views (FBV) or Class-Based Views (CBV)
 - **Database options**: SQLite (dev) or PostgreSQL (production)
+- **Docker support**: Optional `--docker` flag generates a production-ready `Dockerfile`, `docker-compose.yml`, and `entrypoint.sh`
 - **Auto virtual environment**: Creates a venv and installs dependencies automatically
 - **Production-ready settings**: Security hardened, environment variables via `python-decouple`
 - **Admin panel**: Enabled and configured out of the box
@@ -49,6 +50,9 @@ django-kickstart create myproject --type mvp --views fbv --db sqlite
 
 # REST API with class-based views + PostgreSQL
 django-kickstart create myproject --type api --views cbv --db postgresql
+
+# Any project with Docker support
+django-kickstart create myproject --type api --views fbv --db postgresql --docker
 ```
 
 ### After creating your project
@@ -71,6 +75,24 @@ python manage.py runserver
 
 > **Tip:** Use `--no-venv` to skip automatic virtual environment creation.
 
+### With Docker
+
+If you used `--docker`, skip the venv entirely and use Compose:
+
+```bash
+cd myproject
+cp .env.example .env
+docker-compose up --build
+```
+
+Once the containers are running:
+
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+> **Note:** For PostgreSQL projects, the `web` container waits for the database to pass its health check before running migrations automatically.
+
 ---
 
 ## 🔧 Options
@@ -81,6 +103,7 @@ python manage.py runserver
 | `--views` | `fbv`, `cbv` | interactive | Function or class-based views |
 | `--db` | `sqlite`, `postgresql` | interactive | Database backend |
 | `--no-venv` | — | `false` | Skip automatic virtual environment creation |
+| `--docker` | — | `false` | Add Docker configuration (`Dockerfile`, `docker-compose.yml`, `.dockerignore`, and `entrypoint.sh` for PostgreSQL) |
 
 ---
 
@@ -135,6 +158,16 @@ myproject/
     ├── views.py             # @api_view or ModelViewSet
     ├── urls.py              # DRF Router or explicit paths
     └── tests.py
+```
+
+### With `--docker` (additional files)
+
+```
+myproject/
+├── Dockerfile              # python:3.12-slim-bookworm, no-cache pip install
+├── docker-compose.yml      # web service (+ db service for PostgreSQL)
+├── .dockerignore
+└── entrypoint.sh           # PostgreSQL only — waits for DB, then migrates
 ```
 
 ---

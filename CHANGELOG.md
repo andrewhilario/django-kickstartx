@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.0.5] — 2026-02-20
+
+### 🐳 Docker Support
+
+- **New `--docker` flag**: Adds a ready-to-use Docker setup to any generated project
+- **`Dockerfile`**: Multi-stage-friendly, based on `python:3.12-slim-bookworm` (Debian Buster EOL replaced); uses `--no-cache-dir` and a single chained `RUN` to minimise image layers and size
+- **`docker-compose.yml`**: PostgreSQL projects get a full `web` + `db` service setup; SQLite projects get a minimal single-service config; deprecated `version:` field removed
+- **`entrypoint.sh`**: Generated for PostgreSQL projects only — waits for the database to be ready via `nc` before running migrations; `set -e` ensures the container exits on any failure
+- **`.dockerignore`**: Excludes `venv`, `__pycache__`, `.env`, `*.sqlite3`, `staticfiles/`, `media/`, and other build-irrelevant paths
+- **Health-checked `depends_on`**: Compose uses `condition: service_healthy` with a `pg_isready` healthcheck on the `db` service — container startup order is now truly safe
+- **Correct Docker DB host**: `DB_HOST` is injected as `db` (the Compose service name) via the `environment` block, overriding any `.env` value that would incorrectly point to `localhost`
+- **Context-aware next steps**: When `--docker` is used, the post-generation output shows `docker-compose up --build` and `docker-compose exec web python manage.py createsuperuser` instead of local-dev instructions
+
 ## [1.0.2] — 2026-02-18
 
 ### 🚀 Features

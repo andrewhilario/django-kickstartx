@@ -22,6 +22,7 @@ class ProjectGenerator:
         view_style: str = "fbv",
         database: str = "sqlite",
         app_name: str = "core",
+        with_docker: bool = False,
     ):
         # Validate project name against path traversal
         if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', project_name):
@@ -35,6 +36,7 @@ class ProjectGenerator:
         self.view_style = view_style
         self.database = database
         self.app_name = app_name
+        self.with_docker = with_docker
         self.output_dir = Path(os.getcwd()).resolve() / project_name
 
         self.env = Environment(
@@ -59,6 +61,7 @@ class ProjectGenerator:
             "is_fbv": view_style == "fbv",
             "is_postgresql": database == "postgresql",
             "is_sqlite": database == "sqlite",
+            "is_docker": with_docker,
         }
 
     def generate(self):
@@ -73,6 +76,8 @@ class ProjectGenerator:
         self._create_root_files()
         self._create_project_config()
         self._create_app()
+        if self.with_docker:
+            self._create_docker_files()
 
         if self.project_type == "mvp":
             self._create_templates()
@@ -151,3 +156,16 @@ class ProjectGenerator:
     def _create_static_files(self):
         """Create static CSS file (MVP only)."""
         self._write("static/css/style.css", self._render("static/style.css.j2"))
+
+    def _create_docker_files(self):
+        """Create Docker configuration files."""
+        self._write("Dockerfile", self._render("Dockerfile.j2"))
+        self._write("docker-compose.yml", self._render("docker-compose.yml.j2"))
+        self._write(".dockerignore", self._render(".dockerignore.j2"))
+        if self.database == "postgresql":
+            self._write("entrypoint.sh", self._render("entrypoint.sh.j2"))
+            # entrypoint.sh needs to be executable on Linux/Mac,
+            # but on Windows we can just write the file.
+            # Users on Linux/Mac will need to `chmod +x entrypoint.sh`
+            # or the Dockerfile handles it (which we added).
+
