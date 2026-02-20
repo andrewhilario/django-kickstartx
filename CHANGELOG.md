@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0] — 2026-02-20
+
+### 🐛 Bug Fixes
+
+- **Fix `TemplateNotFound: .env.example.j2` on project creation**: Dotfile templates (`.env.example.j2`, `.gitignore.j2`, `.dockerignore.j2`) were silently excluded from the published wheel because setuptools' glob `**/*.j2` does not match leading-dot filenames. All three are now listed explicitly in `[tool.setuptools.package-data]`, resolving the crash for all project types including `--docker`.
+
+---
+
+## [1.0.6] — 2026-02-20
+
+### 🐛 Bug Fixes
+
+- **Fix missing dotfile templates in published package**: `.env.example.j2`, `.gitignore.j2`, and `.dockerignore.j2` were excluded from the wheel because Python's glob `*` does not match leading-dot filenames. These three templates are now listed explicitly in `[tool.setuptools.package-data]`, so `django-kickstart create --docker` (and all other project types) no longer raises `jinja2.exceptions.TemplateNotFound`.
+
+---
+
 ## [1.0.5] — 2026-02-20
 
 ### 🐳 Docker Support

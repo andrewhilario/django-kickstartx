@@ -5,6 +5,9 @@ django_kickstart/__init__.py
 django_kickstart/cli.py
 django_kickstart/generator.py
 django_kickstart/venv_utils.py
+django_kickstart/templates/.dockerignore.j2
+django_kickstart/templates/.env.example.j2
+django_kickstart/templates/.gitignore.j2
 django_kickstart/templates/Dockerfile.j2
 django_kickstart/templates/docker-compose.yml.j2
 django_kickstart/templates/entrypoint.sh.j2

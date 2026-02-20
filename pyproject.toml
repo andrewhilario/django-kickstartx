@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-kickstartx"
-version = "1.0.5"
+version = "1.1.0"
 description = "Scaffold production-ready Django projects in seconds — MVP or REST API, CBV or FBV."
 readme = "README.md"
 license = {text = "MIT"}
@@ -47,4 +47,9 @@ django-kickstart = "django_kickstart.cli:main"
 include = ["django_kickstart*"]
 
 [tool.setuptools.package-data]
-django_kickstart = ["templates/**/*.j2"]
+django_kickstart = [
+    "templates/**/*.j2",
+    "templates/.env.example.j2",
+    "templates/.gitignore.j2",
+    "templates/.dockerignore.j2",
+]

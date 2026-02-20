@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: django-kickstartx
-Version: 1.0.5
+Version: 1.1.0
 Summary: Scaffold production-ready Django projects in seconds — MVP or REST API, CBV or FBV.
 Author-email: Drew Hilario <hilarioandrew12@gmail.com>
 License: MIT
