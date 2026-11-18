@@ -4,6 +4,7 @@ import click
 from colorama import init, Fore, Style
 
 from django_kickstart import __version__
+from django_kickstart.db_utils import create_postgres_database
 from django_kickstart.generator import ProjectGenerator, validate_identifier
 from django_kickstart.venv_utils import create_virtualenv, _get_activate_hint
 
@@ -184,6 +185,22 @@ def create(
         project_dir = generator.output_dir
         venv_created = create_virtualenv(project_dir)
 
+    # Auto-create PostgreSQL database (local non-Docker projects)
+    db_create_warning = None
+    if database == "postgresql" and not with_docker:
+        db_name = f"{project_name}_db"
+        click.echo(
+            f"\n{Fore.CYAN}🐘 Creating PostgreSQL database '{db_name}'...{Style.RESET_ALL}"
+        )
+        db_created, db_msg = create_postgres_database(db_name=db_name)
+        if db_created:
+            click.echo(f"  {Fore.GREEN}✔ {db_msg}{Style.RESET_ALL}")
+        else:
+            db_create_warning = db_msg
+            click.echo(
+                f"  {Fore.YELLOW}⚠ Could not create database automatically: {db_msg}{Style.RESET_ALL}"
+            )
+
     # Success message
     click.echo(f"\n{Fore.GREEN}{'━' * 50}")
     click.echo(f"  ✅ Project '{project_name}' created successfully!")
@@ -205,6 +222,21 @@ def create(
             click.echo("  pip install -r requirements.txt")
 
         click.echo("  cp .env.example .env")
+
+        if database == "postgresql" and db_create_warning:
+            click.echo(
+                f"\n{Fore.YELLOW}⚠ PostgreSQL database was not created automatically.{Style.RESET_ALL}"
+            )
+            click.echo(
+                "  Make sure PostgreSQL is running, then create the database manually:"
+            )
+            click.echo(
+                f'  {Fore.CYAN}psql -U postgres -c "CREATE DATABASE {project_name}_db;"{Style.RESET_ALL}'
+            )
+            click.echo(
+                f"  Then update the credentials in {Fore.CYAN}.env{Style.RESET_ALL} to match your PostgreSQL setup.\n"
+            )
+
         click.echo("  python manage.py migrate")
         click.echo("  python manage.py createsuperuser")
         click.echo("  python manage.py runserver")
