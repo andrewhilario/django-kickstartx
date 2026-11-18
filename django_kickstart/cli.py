@@ -4,7 +4,7 @@ import click
 from colorama import init, Fore, Style
 
 from django_kickstart import __version__
-from django_kickstart.generator import ProjectGenerator
+from django_kickstart.generator import ProjectGenerator, validate_identifier
 from django_kickstart.venv_utils import create_virtualenv, _get_activate_hint
 
 init(autoreset=True)
@@ -90,6 +90,13 @@ def main():
     help="Database: sqlite or postgresql.",
 )
 @click.option(
+    "--app",
+    "app_name",
+    default="core",
+    show_default=True,
+    help="Name of the starter Django app.",
+)
+@click.option(
     "--no-venv",
     "no_venv",
     is_flag=True,
@@ -103,19 +110,32 @@ def main():
     default=False,
     help="Add Docker configuration.",
 )
-def create(project_name: str, project_type: str, view_style: str, database: str, no_venv: bool, with_docker: bool):
+def create(
+    project_name: str,
+    project_type: str,
+    view_style: str,
+    database: str,
+    app_name: str,
+    no_venv: bool,
+    with_docker: bool,
+):
     """Create a new Django project scaffold.
 
     PROJECT_NAME is the name of the project to create.
     """
     click.echo(BANNER)
 
-    # Validate project name
-    if not project_name.isidentifier():
-        click.echo(
-            f"{Fore.RED}✖ '{project_name}' is not a valid Python identifier. "
-            f"Use only letters, numbers, and underscores.{Style.RESET_ALL}"
-        )
+    # Validate project and app names upfront
+    try:
+        validate_identifier(project_name, "Project name")
+        validate_identifier(app_name, "App name")
+        if project_name == app_name:
+            raise ValueError(
+                f"Project name and app name cannot both be '{project_name}'. "
+                "Choose a different project name or pass a different --app name."
+            )
+    except ValueError as e:
+        click.echo(f"{Fore.RED}✖ {e}{Style.RESET_ALL}")
         raise SystemExit(1)
 
     # Interactive prompts for missing options
@@ -134,6 +154,7 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
     click.echo(f"   Type:     {PROJECT_TYPES[project_type]}")
     click.echo(f"   Views:    {VIEW_STYLES[view_style]}")
     click.echo(f"   Database: {DATABASES[database]}")
+    click.echo(f"   App:      {app_name}")
     if with_docker:
         click.echo(f"   Docker:   {Fore.GREEN}Yes{Style.RESET_ALL}")
     click.echo()
@@ -144,6 +165,7 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
         project_type=project_type,
         view_style=view_style,
         database=database,
+        app_name=app_name,
         with_docker=with_docker,
     )
 
@@ -156,9 +178,9 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
         click.echo(f"{Fore.RED}✖ {e}{Style.RESET_ALL}")
         raise SystemExit(1)
 
-    # Create virtual environment (unless opted out)
+    # Create virtual environment (unless opted out or using Docker)
     venv_created = False
-    if not no_venv:
+    if not no_venv and not with_docker:
         project_dir = generator.output_dir
         venv_created = create_virtualenv(project_dir)
 
@@ -171,9 +193,9 @@ def create(project_name: str, project_type: str, view_style: str, database: str,
 
     if with_docker:
         click.echo("  cp .env.example .env")
-        click.echo(f"  {Fore.CYAN}docker-compose up --build{Style.RESET_ALL}")
+        click.echo(f"  {Fore.CYAN}docker compose up --build{Style.RESET_ALL}")
         click.echo(f"\n{Fore.YELLOW}Once running:{Style.RESET_ALL}")
-        click.echo("  docker-compose exec web python manage.py createsuperuser")
+        click.echo("  docker compose exec web python manage.py createsuperuser")
     else:
         if venv_created:
             click.echo(f"  {_get_activate_hint()}")

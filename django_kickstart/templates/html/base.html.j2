@@ -4,33 +4,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %} | {% endraw %}{{ project_name }}{% raw %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}{% endblock %} · {% endraw %}{{ project_name }}{% raw %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="{% url 'home' %}" class="navbar-brand">{% endraw %}{{ project_name }}{% raw %}</a>
-            <ul class="navbar-nav">
-                <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="{% url 'about' %}">About</a></li>
-                <li><a href="{% url 'admin:index' %}">Admin</a></li>
-            </ul>
+    <header class="navbar" role="banner">
+        <div class="container navbar__inner">
+            <div class="navbar__left">
+                <a href="{% url 'home' %}" class="navbar-brand">{% endraw %}{{ project_name }}{% raw %}</a>
+                <nav aria-label="Primary">
+                    <ul class="navbar-nav">
+                        <li><a href="{% url 'home' %}" class="nav__link">Home</a></li>
+                        <li><a href="{% url 'about' %}" class="nav__link">Architecture</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="navbar__right">
+                <button type="button" class="searchpill" id="searchpill" aria-label="Open command menu (Ctrl+K or Command+K)" aria-haspopup="dialog" aria-expanded="false" aria-controls="cmdk">
+                    <span class="searchpill__text">Jump to route…</span>
+                    <span class="searchpill__kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+                </button>
+                <a href="{% url 'admin:index' %}" class="btn btn--primary">Open Admin</a>
+            </div>
         </div>
-    </nav>
+    </header>
 
-    <main class="container">
+    <main>
         {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 {% endraw %}{{ project_name }}{% raw %}. All rights reserved.</p>
+        <div class="container footer__inner">
+            <p>&copy; 2026 {% endraw %}{{ project_name }}{% raw %} · Scaffolded with Django Kickstart · MIT licensed</p>
+            <div class="footer__links">
+                <a href="{% url 'home' %}" class="foot__link">Home</a>
+                <a href="{% url 'about' %}" class="foot__link">Architecture</a>
+                <a href="{% url 'admin:index' %}" class="foot__link">Django Admin</a>
+            </div>
         </div>
     </footer>
 
+    <div class="cmdk" id="cmdk" aria-hidden="true">
+        <div class="cmdk__backdrop" data-cmdk-close></div>
+        <div class="cmdk__panel" role="dialog" aria-modal="true" aria-label="Command palette">
+            <div class="cmdk__field">
+                <input type="search" id="cmdk-input" class="cmdk__input" placeholder="Filter routes and actions…" autocomplete="off">
+                <span class="searchpill__kbd"><kbd>esc</kbd></span>
+            </div>
+            <div class="cmdk__results" id="cmdk-results" role="listbox">
+                <button type="button" class="cmdk__item is-active" role="option" data-href="{% url 'home' %}">
+                    <span>Home — Active item registry</span>
+                    <span class="cmdk__hint">/</span>
+                </button>
+                <button type="button" class="cmdk__item" role="option" data-href="{% url 'about' %}">
+                    <span>Architecture — Project layout &amp; stack</span>
+                    <span class="cmdk__hint">/about/</span>
+                </button>
+                <button type="button" class="cmdk__item" role="option" data-href="{% url 'admin:index' %}">
+                    <span>Open Django Admin</span>
+                    <span class="cmdk__hint">/admin/</span>
+                </button>
+            </div>
+            <div class="cmdk__foot">
+                <span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span>
+                <span><kbd>↵</kbd> open</span>
+                <span><kbd>esc</kbd> close</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const modal = document.getElementById("cmdk");
+            const trigger = document.getElementById("searchpill");
+            const input = document.getElementById("cmdk-input");
+            const items = Array.from(document.querySelectorAll(".cmdk__item"));
+            let activeIndex = 0;
+
+            function visibleItems() {
+                return items.filter((el) => !el.hidden);
+            }
+
+            function syncActive() {
+                const list = visibleItems();
+                items.forEach((el) => el.classList.remove("is-active"));
+                if (list.length > 0) {
+                    activeIndex = ((activeIndex % list.length) + list.length) % list.length;
+                    list[activeIndex].classList.add("is-active");
+                }
+            }
+
+            function openPalette() {
+                modal.classList.add("is-open");
+                modal.setAttribute("aria-hidden", "false");
+                trigger.setAttribute("aria-expanded", "true");
+                input.value = "";
+                items.forEach((el) => { el.hidden = false; });
+                activeIndex = 0;
+                syncActive();
+                input.focus({ preventScroll: true });
+            }
+
+            function closePalette() {
+                modal.classList.remove("is-open");
+                modal.setAttribute("aria-hidden", "true");
+                trigger.setAttribute("aria-expanded", "false");
+                trigger.focus({ preventScroll: true });
+            }
+
+            trigger.addEventListener("click", openPalette);
+            modal.querySelectorAll("[data-cmdk-close]").forEach((el) => {
+                el.addEventListener("click", closePalette);
+            });
+
+            input.addEventListener("input", function () {
+                const q = input.value.trim().toLowerCase();
+                items.forEach((el) => {
+                    el.hidden = !el.textContent.toLowerCase().includes(q);
+                });
+                activeIndex = 0;
+                syncActive();
+            });
+
+            items.forEach((el) => {
+                el.addEventListener("click", function () {
+                    const href = el.getAttribute("data-href");
+                    if (href) window.location.href = href;
+                });
+            });
+
+            document.addEventListener("keydown", function (e) {
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+                    e.preventDefault();
+                    if (modal.classList.contains("is-open")) closePalette();
+                    else openPalette();
+                    return;
+                }
+                if (!modal.classList.contains("is-open")) return;
+                const list = visibleItems();
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    closePalette();
+                } else if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    activeIndex += 1;
+                    syncActive();
+                } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    activeIndex -= 1;
+                    syncActive();
+                } else if (e.key === "Enter" && list[activeIndex]) {
+                    e.preventDefault();
+                    const href = list[activeIndex].getAttribute("data-href");
+                    if (href) window.location.href = href;
+                }
+            });
+        })();
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>{% endraw %}

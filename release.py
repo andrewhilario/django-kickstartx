@@ -21,20 +21,23 @@ def increment_patch_version(version):
     return f"{major}.{minor}.{patch + 1}"
 
 def update_file_version(filepath, old_version, new_version):
-    """Replace version string in a file"""
+    """Replace version declaration in a file safely via regex."""
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
-    
-    new_content = content.replace(old_version, new_version)
-    
+
+    pattern = rf'((?:__version__|version)\s*=\s*"){re.escape(old_version)}(")'
+    new_content, count = re.subn(pattern, rf"\g<1>{new_version}\g<2>", content, count=1)
+    if count == 0:
+        raise ValueError(f"Could not find version '{old_version}' in {filepath}")
+
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(new_content)
     print(f"Updated {filepath}: {old_version} -> {new_version}")
 
 def run_command(command, fail_message):
-    """Run a shell command and exit on failure"""
+    """Run a command and exit on failure."""
     try:
-        subprocess.run(command, check=True, shell=True)
+        subprocess.run(command, check=True)
     except subprocess.CalledProcessError:
         print(f"Error: {fail_message}")
         sys.exit(1)
@@ -114,12 +117,14 @@ def main():
     
     # 5. Build
     print("📦 Building package...")
-    run_command("python -m build", "Failed to build package")
+    run_command([sys.executable, "-m", "build"], "Failed to build package")
     
     # 6. Upload
     print(f"⬆️ Uploading version {new_version} to PyPI...")
     # Using twine to upload. Assumes user has credentials set up or will enter them.
-    run_command("twine upload dist/*", "Failed to upload to PyPI")
+    run_command([sys.executable, "-m", "twine", "upload", *sorted(
+        os.path.join("dist", f) for f in os.listdir("dist")
+    )], "Failed to upload to PyPI")
     
     print(f"✅ Successfully released version {new_version}!")
 

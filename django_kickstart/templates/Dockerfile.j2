@@ -25,13 +25,13 @@ RUN pip install --upgrade pip --no-cache-dir \
 # Copy project
 COPY . .
 
-{% if is_postgresql %}
-# Make entrypoint executable (fix Windows line endings too)
-RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh \
-  && chmod +x /usr/src/app/entrypoint.sh
+# Install entrypoint outside /usr/src/app so host bind-mounts do not overwrite it
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN sed -i 's/\r$//g' /usr/local/bin/entrypoint.sh \
+  && chmod +x /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
-{% endif %}
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
 

@@ -14,6 +14,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.filter(is_active=True)
     serializer_class = ItemSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filterset_fields = ["is_active"]
 
     def perform_create(self, serializer):
         """Hook for custom logic on create."""

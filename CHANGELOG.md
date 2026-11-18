@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.2.0] — 2026-11-18
+
+### ✨ Features & UI Redesign
+- **Hallmark `Cobalt` MVP Starter UI**: Redesigned `base.html`, `home.html`, `about.html`, and `style.css` using the Hallmark `Cobalt` (`modern-minimal`) design system — featuring a full OKLCH token sheet (`static/css/tokens.css`), `Space Grotesk` + `IBM Plex Sans` + `JetBrains Mono` typography, an asymmetric split diptych hero with live runtime spec readout, a working `⌘K` / `Ctrl+K` route command palette, tabular item registry, and a dark graphite terminal quickstart band.
+- **Custom `--app` CLI Flag**: Added `--app` option to `django-kickstart create` to customize the starter Django app name (defaults to `core`) with automatic PascalCase `AppConfig` generation.
+- **Ready-to-Run Initial Migration**: Generated apps now include `<app>/migrations/0001_initial.py` for the `Item` model so `python manage.py migrate` and `python manage.py test` work immediately out of the box.
+- **`django-filter` Pre-configured**: Added `django_filters` to `INSTALLED_APPS`, `REST_FRAMEWORK["DEFAULT_FILTER_BACKENDS"]`, and `ItemViewSet.filterset_fields` for API projects.
+- **FBV API `PATCH` Support**: Added `PATCH` partial-update support and `is_active=True` detail filtering to Function-Based API views for full parity with Class-Based `ModelViewSet`.
+
+### 🐛 Bug Fixes & Security
+- **Docker + PostgreSQL Credentials Alignment**: Aligned `docker-compose.yml` database service credentials with `.env` (`DB_NAME`, `DB_USER`, `DB_PASSWORD`) so `docker compose up --build` connects cleanly out of the box.
+- **Windows CRLF & Bind-Mount Entrypoint Fix**: Forced LF (`\n`) line endings on all generated files and installed `entrypoint.sh` to `/usr/local/bin/entrypoint.sh` inside the Docker image so host volume mounts never overwrite container entrypoint permissions or line endings.
+- **SQLite Docker Migrations**: Included `entrypoint.sh` for all `--docker` builds so SQLite containers also apply migrations automatically on startup.
+- **Env-Safe `SECRET_KEY` Generation**: Excluded `#`, `$`, quotes, and backslashes from generated `SECRET_KEY` values to prevent `python-decouple` inline-comment truncation and Docker Compose variable interpolation errors.
+- **Strict Identifier & Collision Validation**: Added validation rejecting Python keywords (`class`, `def`, `async`), reserved package names (`django`, `test`, `site`), and `project_name == app_name` collisions.
+
+---
+
 ## [1.1.0] — 2026-02-20
 
 ### 🐛 Bug Fixes

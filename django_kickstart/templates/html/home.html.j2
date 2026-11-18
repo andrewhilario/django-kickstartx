@@ -4,25 +4,81 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <h1>Welcome to {% endraw %}{{ project_name }}{% raw %}</h1>
-    <p>Your Django project is up and running! Start building something amazing.</p>
+<section class="hero reveal" style="--i: 0">
+    <div class="container hero__grid">
+        <div>
+            <h1 class="hero__title">{% endraw %}{{ project_name }}{% raw %} is running.</h1>
+            <p class="hero__lede">
+                Configured with environment-isolated secrets, initial database migrations, and the <code>{% endraw %}{{ app_name }}{% raw %}</code> application wired out of the box.
+            </p>
+            <div class="hero__actions">
+                <a href="{% url 'admin:index' %}" class="btn btn--primary">Create item in Admin</a>
+                <a href="{% url 'about' %}" class="btn btn--secondary">Inspect architecture</a>
+            </div>
+        </div>
+
+        <aside class="spec-panel" aria-label="Runtime configuration readout">
+            <div class="spec-panel__header">
+                <span>{% endraw %}{{ project_name }}.settings{% raw %}</span>
+                <span class="status-chip">200 OK · READY</span>
+            </div>
+            <pre class="spec-panel__code"><span class="tok-muted"># Active project configuration</span>
+<span class="tok-signal">PROJECT</span>   = "{% endraw %}{{ project_name }}{% raw %}"
+<span class="tok-signal">APP</span>       = "{% endraw %}{{ app_name }}{% raw %}"
+<span class="tok-signal">VIEWS</span>     = "{% endraw %}{{ view_style | upper }}{% raw %}"
+<span class="tok-signal">DATABASE</span>  = "{% endraw %}{{ database }}{% raw %}"
+<span class="tok-signal">ITEMS</span>     = {{ items|length }}</pre>
+        </aside>
+    </div>
 </section>
 
-<section class="items-section">
-    <h2>Items</h2>
-    {% if items %}
-        <div class="items-grid">
-            {% for item in items %}
-                <div class="item-card">
-                    <h3>{{ item.title }}</h3>
-                    <p>{{ item.description|truncatewords:20 }}</p>
-                    <small>Created: {{ item.created_at|date:"M d, Y" }}</small>
-                </div>
-            {% endfor %}
+<section class="items-section reveal" style="--i: 1">
+    <div class="container">
+        <header class="section__head">
+            <h2 class="section__title">Active items</h2>
+            <p class="section__subtitle">Records queried from <code>{% endraw %}{{ app_name }}{% raw %}.models.Item</code> where <code>is_active=True</code>.</p>
+        </header>
+
+        {% if items %}
+            <div class="items-grid">
+                {% for item in items %}
+                    <article class="item-card">
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.description|truncatewords:24|default:"No description provided." }}</p>
+                        <small class="tnum">{{ item.created_at|date:"Y-m-d" }}</small>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3 class="empty-state__title">No active items yet.</h3>
+                <p class="empty-state__copy">Items you create and mark active in the Django Admin appear in this registry immediately.</p>
+                <a href="{% url 'admin:index' %}" class="btn btn--primary">Create first item</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="band--graphite reveal" style="--i: 2">
+    <div class="container band__grid">
+        <div>
+            <h2 class="section__title">Next commands in your terminal</h2>
+            <p>Run migrations, create an administrator account, or execute the test suite directly from your project root.</p>
         </div>
-    {% else %}
-        <p class="empty-state">No items yet. <a href="{% url 'admin:index' %}">Add some via the admin panel</a>.</p>
-    {% endif %}
+        <ul class="command-list">
+            <li class="command-list__row">
+                <code>python manage.py migrate</code>
+                <span class="command-list__label">Apply schema</span>
+            </li>
+            <li class="command-list__row">
+                <code>python manage.py createsuperuser</code>
+                <span class="command-list__label">Admin access</span>
+            </li>
+            <li class="command-list__row">
+                <code>python manage.py test</code>
+                <span class="command-list__label">Verify suite</span>
+            </li>
+        </ul>
+    </div>
 </section>
 {% endblock %}{% endraw %}

@@ -82,13 +82,13 @@ If you used `--docker`, skip the venv entirely and use Compose:
 ```bash
 cd myproject
 cp .env.example .env
-docker-compose up --build
+docker compose up --build
 ```
 
 Once the containers are running:
 
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 > **Note:** For PostgreSQL projects, the `web` container waits for the database to pass its health check before running migrations automatically.
@@ -102,8 +102,9 @@ docker-compose exec web python manage.py createsuperuser
 | `--type` | `mvp`, `api` | interactive | MVP (templates) or API (DRF) |
 | `--views` | `fbv`, `cbv` | interactive | Function or class-based views |
 | `--db` | `sqlite`, `postgresql` | interactive | Database backend |
+| `--app` | identifier | `core` | Name of the starter Django app |
 | `--no-venv` | — | `false` | Skip automatic virtual environment creation |
-| `--docker` | — | `false` | Add Docker configuration (`Dockerfile`, `docker-compose.yml`, `.dockerignore`, and `entrypoint.sh` for PostgreSQL) |
+| `--docker` | — | `false` | Add Docker configuration (`Dockerfile`, `docker-compose.yml`, `.dockerignore`, and `entrypoint.sh`) |
 
 ---
 
@@ -124,6 +125,8 @@ myproject/
 │   ├── wsgi.py
 │   └── asgi.py
 ├── core/
+│   ├── migrations/
+│   │   └── 0001_initial.py # Ready-to-run initial migration
 │   ├── admin.py            # Item model registered
 │   ├── models.py           # Example Item model
 │   ├── views.py            # FBV or CBV
@@ -134,7 +137,9 @@ myproject/
 │       ├── base.html
 │       ├── home.html
 │       └── about.html
-└── static/css/style.css
+└── static/css/
+    ├── tokens.css          # OKLCH design tokens (Cobalt theme)
+    └── style.css           # Hallmark anti-slop starter stylesheet
 ```
 
 ### API (DRF) Project
@@ -152,6 +157,8 @@ myproject/
 │   ├── wsgi.py
 │   └── asgi.py
 └── core/
+    ├── migrations/
+    │   └── 0001_initial.py  # Ready-to-run initial migration
     ├── admin.py
     ├── models.py
     ├── serializers.py       # DRF ModelSerializer
@@ -167,7 +174,7 @@ myproject/
 ├── Dockerfile              # python:3.12-slim-bookworm, no-cache pip install
 ├── docker-compose.yml      # web service (+ db service for PostgreSQL)
 ├── .dockerignore
-└── entrypoint.sh           # PostgreSQL only — waits for DB, then migrates
+└── entrypoint.sh           # Waits for DB (PostgreSQL) and runs migrations automatically
 ```
 
 ---

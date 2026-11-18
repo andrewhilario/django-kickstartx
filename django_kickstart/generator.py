@@ -1,15 +1,50 @@
 """Project generator — renders Jinja2 templates into a Django project tree."""
 
+import keyword
 import os
 import re
 import secrets
-import string
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+# Characters safe for unquoted .env files (python-decouple) and Docker Compose env_file
+SECRET_KEY_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@^&*(-_=+)"
+
+RESERVED_NAMES = {
+    "django",
+    "test",
+    "tests",
+    "site",
+    "sys",
+    "os",
+    "rest_framework",
+    "corsheaders",
+    "decouple",
+    "django_filters",
+}
+
+
+def validate_identifier(name: str, label: str = "Project name") -> None:
+    """Validate that a project or app name is a safe, non-reserved Python identifier."""
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", name):
+        raise ValueError(
+            f"Invalid {label.lower()} '{name}'. "
+            "Use only letters, numbers, and underscores, and do not start with a number."
+        )
+    if keyword.iskeyword(name):
+        raise ValueError(
+            f"Invalid {label.lower()} '{name}'. "
+            f"'{name}' is a reserved Python keyword."
+        )
+    if name.lower() in RESERVED_NAMES:
+        raise ValueError(
+            f"Invalid {label.lower()} '{name}'. "
+            f"'{name}' conflicts with a standard library or Django package name."
+        )
 
 
 class ProjectGenerator:
@@ -23,12 +58,15 @@ class ProjectGenerator:
         database: str = "sqlite",
         app_name: str = "core",
         with_docker: bool = False,
+        base_dir: Path | None = None,
     ):
-        # Validate project name against path traversal
-        if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', project_name):
+        validate_identifier(project_name, "Project name")
+        validate_identifier(app_name, "App name")
+
+        if project_name == app_name:
             raise ValueError(
-                f"Invalid project name '{project_name}'. "
-                "Use only letters, numbers, and underscores."
+                f"Project name and app name cannot both be '{project_name}'. "
+                "Choose a different project name or pass a different --app name."
             )
 
         self.project_name = project_name
@@ -37,16 +75,16 @@ class ProjectGenerator:
         self.database = database
         self.app_name = app_name
         self.with_docker = with_docker
-        self.output_dir = Path(os.getcwd()).resolve() / project_name
+        root_dir = Path(base_dir).resolve() if base_dir is not None else Path(os.getcwd()).resolve()
+        self.output_dir = (root_dir / project_name).resolve()
 
         self.env = Environment(
             loader=FileSystemLoader(str(TEMPLATES_DIR)),
             keep_trailing_newline=True,
         )
 
-        # Generate a cryptographically secure SECRET_KEY
-        alphabet = string.ascii_letters + string.digits + string.punctuation
-        secret_key = ''.join(secrets.choice(alphabet) for _ in range(50))
+        # Generate a cryptographically secure SECRET_KEY safe for .env and Docker Compose
+        secret_key = "".join(secrets.choice(SECRET_KEY_CHARS) for _ in range(50))
 
         self.context = {
             "project_name": project_name,
@@ -88,22 +126,31 @@ class ProjectGenerator:
         template = self.env.get_template(template_name)
         return template.render(**self.context)
 
-    def _write(self, relative_path: str, content: str):
-        """Write content to a file, creating directories as needed."""
+    def _write(self, relative_path: str, content: str, executable: bool = False):
+        """Write content to a file using LF line endings, creating directories as needed."""
         full_path = (self.output_dir / relative_path).resolve()
 
-        # Prevent path traversal — all files must be within output_dir
-        if not str(full_path).startswith(str(self.output_dir)):
+        # Prevent path traversal — all files must reside inside output_dir
+        try:
+            full_path.relative_to(self.output_dir)
+        except ValueError as exc:
             raise ValueError(
                 f"Path traversal detected: '{relative_path}' escapes the project directory."
-            )
+            ) from exc
 
         full_path.parent.mkdir(parents=True, exist_ok=True)
-        full_path.write_text(content, encoding="utf-8")
+        with open(full_path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(content)
+
+        if executable:
+            try:
+                full_path.chmod(0o755)
+            except OSError:
+                pass
 
     def _create_root_files(self):
         """Create root-level project files."""
-        self._write("manage.py", self._render("manage.py.j2"))
+        self._write("manage.py", self._render("manage.py.j2"), executable=True)
         self._write("requirements.txt", self._render("requirements.txt.j2"))
         self._write(".env.example", self._render(".env.example.j2"))
         self._write(".gitignore", self._render(".gitignore.j2"))
@@ -119,7 +166,7 @@ class ProjectGenerator:
         self._write(f"{config_dir}/asgi.py", self._render("project/asgi.py.j2"))
 
     def _create_app(self):
-        """Create the Django app."""
+        """Create the Django app including initial migrations."""
         app = self.app_name
 
         self._write(f"{app}/__init__.py", "")
@@ -127,6 +174,11 @@ class ProjectGenerator:
         self._write(f"{app}/apps.py", self._render("app/apps.py.j2"))
         self._write(f"{app}/models.py", self._render("app/models.py.j2"))
         self._write(f"{app}/tests.py", self._render("app/tests.py.j2"))
+        self._write(f"{app}/migrations/__init__.py", "")
+        self._write(
+            f"{app}/migrations/0001_initial.py",
+            self._render("app/migrations/0001_initial.py.j2"),
+        )
 
         # Views — branch by project type + view style
         if self.project_type == "api":
@@ -154,7 +206,8 @@ class ProjectGenerator:
         self._write(f"{tpl_dir}/about.html", self._render("html/about.html.j2"))
 
     def _create_static_files(self):
-        """Create static CSS file (MVP only)."""
+        """Create static CSS and design token files (MVP only)."""
+        self._write("static/css/tokens.css", self._render("static/tokens.css.j2"))
         self._write("static/css/style.css", self._render("static/style.css.j2"))
 
     def _create_docker_files(self):
@@ -162,10 +215,6 @@ class ProjectGenerator:
         self._write("Dockerfile", self._render("Dockerfile.j2"))
         self._write("docker-compose.yml", self._render("docker-compose.yml.j2"))
         self._write(".dockerignore", self._render(".dockerignore.j2"))
-        if self.database == "postgresql":
-            self._write("entrypoint.sh", self._render("entrypoint.sh.j2"))
-            # entrypoint.sh needs to be executable on Linux/Mac,
-            # but on Windows we can just write the file.
-            # Users on Linux/Mac will need to `chmod +x entrypoint.sh`
-            # or the Dockerfile handles it (which we added).
+        self._write("entrypoint.sh", self._render("entrypoint.sh.j2"), executable=True)
+
 

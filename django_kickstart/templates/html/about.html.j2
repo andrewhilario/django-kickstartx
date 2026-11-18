@@ -1,16 +1,54 @@
 {% raw %}{% extends "{% endraw %}{{ app_name }}{% raw %}/base.html" %}
 
-{% block title %}About{% endblock %}
+{% block title %}Architecture{% endblock %}
 
 {% block content %}
-<section class="about-section">
-    <h1>About {% endraw %}{{ project_name }}{% raw %}</h1>
-    <p>
-        This project was scaffolded with <strong>Django Kickstart</strong> —
-        a tool for generating production-ready Django projects in seconds.
-    </p>
-    <p>
-        Edit this page at <code>{% endraw %}{{ app_name }}{% raw %}/templates/{% endraw %}{{ app_name }}{% raw %}/about.html</code>.
-    </p>
+<section class="about-section reveal" style="--i: 0">
+    <div class="container about__grid">
+        <div>
+            <h1>About {% endraw %}{{ project_name }}{% raw %}</h1>
+            <p>
+                This project was scaffolded with <strong>Django Kickstart</strong> — a generator for production-ready Django applications with strict environment separation and zero boilerplate clutter.
+            </p>
+            <p>
+                Edit this template at <code>{% endraw %}{{ app_name }}{% raw %}/templates/{% endraw %}{{ app_name }}{% raw %}/about.html</code> or modify your design tokens in <code>static/css/tokens.css</code>.
+            </p>
+            <div class="hero__actions">
+                <a href="{% url 'home' %}" class="btn btn--secondary">Back to registry</a>
+                <a href="{% url 'admin:index' %}" class="btn btn--primary">Open Admin</a>
+            </div>
+        </div>
+
+        <div>
+            <table class="spec-sheet tnum" aria-label="Scaffold specification">
+                <tbody>
+                    <tr>
+                        <th scope="row">Project package</th>
+                        <td><code>{% endraw %}{{ project_name }}/{% raw %}</code></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Primary app</th>
+                        <td><code>{% endraw %}{{ app_name }}/{% raw %}</code></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Architecture</th>
+                        <td>MVP (Server-rendered templates · {% endraw %}{{ view_style | upper }}{% raw %})</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Database engine</th>
+                        <td><code>{% endraw %}{{ database }}{% raw %}</code></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Design tokens</th>
+                        <td><code>static/css/tokens.css</code> (OKLCH · Cobalt)</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Stylesheet</th>
+                        <td><code>static/css/style.css</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </section>
 {% endblock %}{% endraw %}

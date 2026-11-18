@@ -1,0 +1,12 @@
+[
+  {
+    "date": "2026-11-18",
+    "scope": "app",
+    "macrostructure": "Split Studio",
+    "theme": "Cobalt",
+    "enrichment": "none",
+    "nav": "N13",
+    "footer": "Ft2",
+    "brief": "Django Kickstart MVP starter templates (base, home, about)"
+  }
+]
